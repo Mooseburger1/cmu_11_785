@@ -48,13 +48,10 @@ class BatchNorm1d:
         self.dLdBW = dLdBZ  * self.NZ
         self.dLdBb = dLdBZ
 
-        centered = self.Z - self.M
-        denomVar = np.sqrt(self.V + self.eps)
-
         dLdNZ = dLdBZ * self.BW
-        dLdV = - np.sum(dLdNZ * (centered/(2*(denomVar**3))), axis=0)
-        dLdM = - np.sum(dLdNZ / denomVar, axis=0) - (2 / self.N) * dLdV * np.sum(centered, axis=0)
+        dLdV = - np.sum(dLdNZ * ((self.Z - self.M)/(2*(np.sqrt(self.V + self.eps)**3))), axis=0)
+        dLdM = - np.sum(dLdNZ / np.sqrt(self.V + self.eps), axis=0) - (2 / self.N) * dLdV * np.sum((self.Z - self.M), axis=0)
 
-        dLdZ = (dLdNZ/denomVar) + (dLdV * (2/self.N) * centered) + (dLdM / self.N)
+        dLdZ = (dLdNZ/np.sqrt(self.V + self.eps)) + (dLdV * (2/self.N) * (self.Z - self.M)) + (dLdM / self.N)
 
         return dLdZ
