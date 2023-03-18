@@ -20,18 +20,17 @@ class Linear:
         :return: Output Z of linear layer with shape (N, C1)
         Read the writeup for implementation details
         """
-        self.A = A  # (batch, N)
+        self.A = A.copy() # (batch, N)
         self.N = A.shape[0] # (batch)
         self.Ones = np.ones((self.N,1)) # (batch, 1)
         Z = (self.A @ self.W.T )+ (self.Ones @ self.b.T) # ((batch, N) x (N x M)) + ((batch, 1) x (1, M)) => (batch,M) + (batch, M) => (batch, M)
-
 
         return Z
 
     def backward(self, dLdZ):
 
-        dZdA = self.W.T # (N x M)
-        dZdW = self.A
+        dZdA = self.W.T.copy() # (N x M)
+        dZdW = self.A.copy()
         dZdb = np.ones((self.N, 1))  # (out_features, 1)
 
         dLdA = dLdZ @ dZdA.T  # (batch, M) x (M, N)

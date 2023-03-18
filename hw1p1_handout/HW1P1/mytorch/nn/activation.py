@@ -5,7 +5,7 @@ class Identity:
 
     def forward(self, Z):
 
-        self.A = Z
+        self.A = Z.copy()
 
         return self.A
 
@@ -25,7 +25,7 @@ class Sigmoid:
     """
 
     def forward(self, Z):
-        self.A = Z
+        self.A = Z.copy()
         
         return 1 / (1 + np.exp(-self.A))
     
@@ -42,7 +42,7 @@ class Tanh:
     """
 
     def forward(self, Z):
-        self.A = Z
+        self.A = Z.copy()
 
         return (np.exp(self.A) - np.exp(-self.A)) / (np.exp(self.A) + np.exp(-self.A))
     
@@ -59,7 +59,7 @@ class ReLU:
     """
 
     def forward(self, Z):
-        self.A = Z
+        self.A = Z.copy()
 
         relu = self.A
         relu[relu <= 0] = 0

@@ -25,33 +25,36 @@ class BatchNorm1d:
         So see what values you need to recompute when eval is False.
         """
         self.Z = Z
-        self.N = None  # TODO
-        self.M = None  # TODO
-        self.V = None  # TODO
+        self.N = self.Z.shape[0]
+        self.M = np.mean(self.Z, axis=0)
+        self.V = np.var(self.Z, axis=0)
 
         if eval == False:
             # training mode
-            self.NZ = None  # TODO
-            self.BZ = None  # TODO
+            self.NZ = (self.Z - self.M) / np.sqrt(self.V + self.eps)
+            self.BZ = (self.BW * self.NZ) + self.Bb
 
-            self.running_M = None  # TODO
-            self.running_V = None  # TODO
+            self.running_M = self.alpha * self.running_M + (1 - self.alpha) * self.M
+            self.running_V = self.alpha * self.running_V + (1 - self.alpha) * self.V
         else:
             # inference mode
-            self.NZ = None  # TODO
-            self.BZ = None  # TODO
+            self.NZ = (self.Z - self.running_M) / np.sqrt(self.running_V + self.eps)
+            self.BZ = (self.BW * self.NZ) + self.Bb
 
         return self.BZ
 
     def backward(self, dLdBZ):
 
-        self.dLdBW = None  # TODO
-        self.dLdBb = None  # TODO
+        self.dLdBW = dLdBZ  * self.NZ
+        self.dLdBb = dLdBZ
 
-        dLdNZ = None  # TODO
-        dLdV = None  # TODO
-        dLdM = None  # TODO
+        centered = self.Z - self.M
+        denomVar = np.sqrt(self.V + self.eps)
 
-        dLdZ = None  # TODO
+        dLdNZ = dLdBZ * self.BW
+        dLdV = - np.sum(dLdNZ * (centered/(2*(denomVar**3))), axis=0)
+        dLdM = - np.sum(dLdNZ / denomVar, axis=0) - (2 / self.N) * dLdV * np.sum(centered, axis=0)
 
-        return NotImplemented
+        dLdZ = (dLdNZ/denomVar) + (dLdV * (2/self.N) * centered) + (dLdM / self.N)
+
+        return dLdZ
